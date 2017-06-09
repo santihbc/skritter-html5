@@ -896,7 +896,7 @@ module.exports = GelatoApplication.extend({
     //use async for cleaner loading code
     async.series(
       [
-        (callback) => {
+        callback => {
           //check for user authentication type
           if (app.user.id === 'application') {
             app.user.session.authenticate(
@@ -927,6 +927,11 @@ module.exports = GelatoApplication.extend({
               }
             );
           }
+        },
+        async callback => {
+          await this.user.offline.load();
+
+          callback();
         }
       ],
       function() {

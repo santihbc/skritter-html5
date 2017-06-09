@@ -1,3 +1,4 @@
+const OfflineModel = require('models/OfflineModel');
 const SkritterModel = require('base/BaseSkritterModel');
 const SessionModel = require('models/SessionModel');
 const SubscriptionModel = require('models/SubscriptionModel');
@@ -71,6 +72,7 @@ const UserModel = SkritterModel.extend({
    */
   initialize: function() {
     this.characters = new CharacterCollection();
+    this.offline = new OfflineModel(null, {user: this});
     this.session = new SessionModel(null, {user: this});
     this.subscription = new SubscriptionModel({id: this.id});
   },
@@ -330,31 +332,6 @@ const UserModel = SkritterModel.extend({
   },
 
   /**
-   * @method load
-   * @param {Function} callback
-   * @returns {User}
-   */
-  load: function(callback) {
-    var self = this;
-    if (!this.isLoggedIn()) {
-      callback();
-      return this;
-    }
-    async.series(
-      [
-        function(callback) {
-          self.openDatabase(callback);
-        },
-        function(callback) {
-          self.updateItems(callback);
-        }
-      ],
-      callback
-    );
-    return this;
-  },
-
-  /**
    * @method login
    * @param {String} username
    * @param {String} password
@@ -421,144 +398,12 @@ const UserModel = SkritterModel.extend({
   },
 
   /**
-   * @method openDatabase
-   * @param {Function} callback
-   * @returns {User}
-   */
-  openDatabase: function(callback) {
-    var self = this;
-    if (!this.isLoggedIn()) {
-      callback();
-      return this;
-    }
-    this.db = new Dexie(this.id + '-database');
-    this.db.version(2).stores(
-      {
-        items: 'id, *changed, *last, *next',
-        reviews: 'group, *created'
-      }
-    ).upgrade(app.reset);
-    this.db.version(3).stores(
-      {
-        items: 'id, *changed, *lang, *last, *next',
-        reviews: 'group, *created'
-      }
-    ).upgrade(app.reset);
-    this.db.open()
-      .then(function() {
-        callback();
-      })
-      .catch(function(error) {
-        //specially handle error code 8 for safari
-        if (error && error.code === 8) {
-          callback();
-        } else {
-          self.db.delete().then(app.reload);
-        }
-      });
-    return this;
-  },
-
-  /**
    * @method parse
    * @param {Object} response
    * @returns Array
    */
   parse: function(response) {
     return response.User;
-  },
-
-  /**
-   * @method setLastItemUpdate
-   * @param {Number} value
-   * @returns {User}
-   */
-  setLastItemUpdate: function(value) {
-    if (app.isChinese()) {
-      this.set('lastChineseItemUpdate', value);
-    } else {
-      this.set('lastJapaneseItemUpdate', value);
-    }
-    return this;
-  },
-
-  /**
-   * @method updateItems
-   * @param {Function} callback
-   * @returns {User}
-   */
-  updateItems: function(callback) {
-    var self = this;
-    var cursor = undefined;
-    var index = 0;
-    var limit = 2500;
-    var now = moment().unix();
-    var retries = 0;
-    if (!this.isLoggedIn()) {
-      callback();
-      return this;
-    }
-    async.whilst(
-      function() {
-        index++;
-        return cursor !== null;
-      },
-      function(callback) {
-        if (index > 4) {
-          ScreenLoader.notice('(loading can take awhile on larger accounts)');
-        }
-        ScreenLoader.post('Fetching item batch #' + index);
-        $.ajax({
-          method: 'GET',
-          url: app.get('nodeApiRoot') + '/v1/items',
-          data: {
-            cursor: cursor,
-            lang: app.getLanguage(),
-            limit: limit,
-            offset: self.getLastItemUpdate(),
-            order: 'changed',
-            token: self.session.get('access_token')
-          },
-          error: function(error) {
-            if (retries > 2) {
-              callback(error);
-            } else {
-              retries++;
-              limit = 500;
-              setTimeout(callback, 1000);
-            }
-          },
-          success: function(result) {
-            self.db.transaction(
-              'rw',
-              self.db.items,
-              function() {
-                result.Items.forEach(function(item) {
-                  self.db.items.put(item);
-                });
-              }
-            ).then(function() {
-              cursor = result.cursor;
-              setTimeout(callback, 100);
-            }).catch(function(error) {
-              if (retries > 2) {
-                callback(error);
-              } else {
-                retries++;
-                limit = 500;
-                setTimeout(callback, 1000);
-              }
-            });
-          }
-        });
-      },
-      function(error) {
-        self.setLastItemUpdate(now);
-        self.cache();
-        callback(error);
-      }
-    );
-    return this;
   },
 
   /**
