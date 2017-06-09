@@ -403,6 +403,9 @@ const UserModel = SkritterModel.extend({
    * @returns Array
    */
   parse: function(response) {
+    if (response.User && response.User.autoAdvancePrompts) {
+      response.User.autoAdvancePrompts = Boolean(response.User.autoAdvancePrompts);
+    }
     return response.User;
   },
 
