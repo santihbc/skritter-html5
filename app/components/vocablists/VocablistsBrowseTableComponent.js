@@ -64,10 +64,16 @@ const VocablistsBrowseTableComponent = GelatoComponent.extend({
   },
 
   /**
+   * @param {String} [state] the state change that caused the rerender,
+   * if this was called through an event
    * @method render
    * @returns {VocablistsBrowseTableComponent}
    */
-  render: function() {
+  render: function(state) {
+    if (state === 'saving') {
+      return;
+    }
+
     this.update();
     this.renderTemplate();
     this.delegateEvents();
@@ -108,7 +114,9 @@ const VocablistsBrowseTableComponent = GelatoComponent.extend({
     if (vocablist.get('studyingMode') === 'not studying' && !this._adding) {
       this._adding = true;
       vocablist.justAdded = true;
-      target.text(app.locale('pages.vocabLists.adding')).removeClass('add-to-queue-link');
+      target.removeClass('add-to-queue-link');
+      target.find('.glyphicon-plus-sign').hide();
+      target.find('.add-to-queue-text').text(app.locale('pages.vocabLists.adding'));
 
       vocablist.save({'studyingMode': 'adding'}, {
         patch: true,

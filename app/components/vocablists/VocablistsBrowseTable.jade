@@ -27,7 +27,7 @@ gelato-component(data-name='vocablists-browse-table')
             if list.get('studyingMode') === 'not studying' && app.user.isSubscriptionActive()
               span.add-to-queue-link(data-vocablist-id=list.id)
                 span.glyphicon.glyphicon-plus-sign.text-success
-                span= app.locale('pages.vocabLists.addToQueue')
+                span.add-to-queue-text= app.locale('pages.vocabLists.addToQueue')
             else
               if list.getNormalizedStudyingMode() === 'studying' && app.user.isSubscriptionActive()
                 a.btn.btn-success(href='/study/' + list.id) Study
