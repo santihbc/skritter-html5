@@ -50,7 +50,7 @@ exports.config = {
     },
     babel: {
       ignore: ['app/data/*', 'node_modules/*', 'vendor/*'],
-      presets: ['es2015']
+      presets: ['env']
     },
     replace: {
       mappings: {
