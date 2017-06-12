@@ -427,6 +427,7 @@ module.exports = GelatoApplication.extend({
     this.listenTo(vent, 'vocabInfo:toggle', this.toggleVocabInfo);
     this.listenTo(vent, 'notification:show', this.showNotification);
     this.listenTo(vent, 'notification:close', this.closeNotification);
+    this.listenTo(vent, 'callToActionGuide:toggle', this.toggleAppCallToActionGuide);
 
     if (this.isMobile()) {
       this.listenTo(vent, 'mobileNavMenu:toggle', this.toggleSideMenu);
@@ -956,6 +957,24 @@ module.exports = GelatoApplication.extend({
         }
       }
     );
+  },
+
+  /**
+   * Shows/hides a call to action that highlights a part of the application's UI
+   * @param {Boolean} show whether to show or hide
+   * @param {Object} options
+   */
+  toggleAppCallToActionGuide: function(show, options) {
+    $('#app-call-to-action-guide').toggleClass('hidden', !show);
+
+    if (show && options) {
+      let styleStr = '';
+
+      for (let key in options) {
+        styleStr += key + ': ' + options[key] + ';';
+      }
+      $('#app-call-to-action-guide').attr('style', styleStr);
+    }
   },
 
   /**

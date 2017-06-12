@@ -89,6 +89,18 @@ html, body {
   }
 }
 
+.app-cta-guide {
+  width: 100px;
+  height: 100px;
+  background: rgba(150, 255, 150, 0.5);
+  border-radius: 50px;
+  position: absolute;
+  top: 50%;
+
+  // we want this above pretty much everything because it points out UI functionality...it's a meta-element
+  z-index: 8000;
+}
+
 .no-overflow {
   overflow: hidden;
 }
