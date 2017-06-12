@@ -353,17 +353,16 @@ const StudyPromptPartRuneComponent = GelatoComponent.extend({
   },
 
   /**
+   * Handles a swipeup event from the canvas and erases/resets the canvas
    * @method handlePromptCanvasSwipeUp
    */
   handlePromptCanvasSwipeUp: function() {
     this.prompt.review.set({
-      complete: false,
       failedConsecutive: 0,
       failedTotal: 0,
-      teach: false
     });
-    this.prompt.review.character.reset();
-    this.render();
+
+    this.eraseCharacter();
   },
 
   /**
@@ -512,6 +511,8 @@ const StudyPromptPartRuneComponent = GelatoComponent.extend({
     this.prompt.review.set({complete: false, showTeaching: false});
     this.prompt.review.character.reset();
     this.render();
+
+    this.prompt.trigger('character:erased', this.prompt.review);
   },
 
   /**

@@ -25,9 +25,7 @@ StudyPromptShortcuts.prototype._handleActionAudio = function() {
 StudyPromptShortcuts.prototype._handleActionErase = function() {
   switch (this.prompt.reviews.part) {
     case 'rune':
-      this.prompt.review.set({complete: false, teach: false});
-      this.prompt.review.character.reset();
-      this.prompt.renderPart();
+      this.prompt.part.eraseCharacter();
       break;
   }
 };
