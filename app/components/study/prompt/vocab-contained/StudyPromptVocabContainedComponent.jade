@@ -20,7 +20,13 @@ gelato-component(data-name='study-prompt-vocab-contained')
             .child-vocab-row
               span.child-writing(data-vocabid=vocab.id, class=prompt.reviews.isChinese() ? 'text-chinese' : 'text-japanese')= writing
               | &nbsp;
-              span.child-reading= prompt.reviews.isChinese() ? app.fn.pinyin.toTone(reading) : reading
+
+              if vocab.isChinese() && (app.user.get('readingChinese') === 'zhuyin')
+                span.spr= app.fn.pinyin.toZhuyin(reading)
+              else if  vocab.isChinese()
+                span.spr= app.fn.pinyin.toTone(reading)
+              else
+                span.spr= reading
 
             .child-vocab-row
               .child-definition
@@ -73,7 +79,13 @@ gelato-component(data-name='study-prompt-vocab-contained')
               .child-vocab-row
                 span.child-writing(class=prompt.reviews.isChinese() ? 'text-chinese' : 'text-japanese', data-vocabid=id)= writing
                 | &nbsp;
-                span.child-reading= prompt.reviews.isChinese() ? app.fn.pinyin.toTone(reading) : reading
+
+                if vocab.isChinese() && (app.user.get('readingChinese') === 'zhuyin')
+                  span.spr= app.fn.pinyin.toZhuyin(reading)
+                else if  vocab.isChinese()
+                  span.spr= app.fn.pinyin.toTone(reading)
+                else
+                  span.spr= reading
 
             if contained.length && definition
               .child-vocab-row
