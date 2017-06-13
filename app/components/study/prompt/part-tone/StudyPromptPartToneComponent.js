@@ -332,13 +332,14 @@ const StudyPromptPartToneComponent = GelatoComponent.extend({
    * @method completeTone
    */
   completeTone: function() {
-    console.log('tits');
-    var possibleTones = this.prompt.review.getTones();
-    var expectedTone = this.prompt.review.character.getTone(possibleTones[0]);
+    const possibleTones = this.prompt.review.getTones();
+    const expectedTone = this.prompt.review.character.getTone(possibleTones[0]);
+
     this.prompt.canvas.clearLayer('character');
     this.prompt.review.set('complete', true);
     this.prompt.review.character.reset();
     this.prompt.review.character.add(expectedTone);
+
     this.render();
   }
 
