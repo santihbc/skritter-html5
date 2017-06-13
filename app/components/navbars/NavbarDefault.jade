@@ -81,6 +81,8 @@ bootstrap-navbar(data-name='default')
         else
 
           ul.nav.navbar-nav.logged-out-nav
+            li(class=currentSection === 'demo' ? 'active' : '')
+              a(href="/demo", target="_blank") Try It Out
             li(class=currentSection === 'features' ? 'active' : '')
               a(href="/features", target="_blank") Features
             li

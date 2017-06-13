@@ -46,6 +46,8 @@ body
             #navbar-collapse.collapse.navbar-collapse
 
               ul.nav.navbar-nav
+                li(class=currentSection === 'demo' ? 'active' : '')
+                  a#demo-link(href="/demo") Try It Out
                 li(class=currentSection === 'features' ? 'active' : '')
                   a#features-link(href="/features") Features
                 li
