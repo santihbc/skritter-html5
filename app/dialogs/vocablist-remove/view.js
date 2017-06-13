@@ -130,7 +130,7 @@ module.exports = BootstrapDialog.extend({
     });
 
     this.$('.step-1').addClass('hidden');
-    this.$('.modal-footer').addClass('hidden');
+    this.$('#confirm-btn').addClass('hidden');
     this.$('.step-2').removeClass('hidden');
   },
 
@@ -162,7 +162,7 @@ module.exports = BootstrapDialog.extend({
    */
   resetUI: function() {
     this.hideError();
-    this.$('.modal-footer').removeClass('hidden');
+    this.$('.#confirm-btn').removeClass('hidden');
     this.$('.step-1').removeClass('hidden');
     this.$('.step-2').addClass('hidden');
   },

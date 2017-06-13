@@ -7,23 +7,24 @@ bootstrap-dialog(data-name='vocablist-remove')
             | Remove From Studies:
             br
             em  "#{view.vocablist.get('name')}"
-        .modal-body.step-1
+        .modal-body
           #error-msg.alert.alert-danger.hidden
-          p.text-danger Are you sure you want to delete all words in this list from study?
+          .step-1
+            p.text-danger Are you sure you want to delete all words in this list from study?
 
-          strong About Word Deletion
+            strong About Word Deletion
 
-          ul.text-muted
-            li We recommend you don't delete words. That way you won't forget old vocabulary!
-            li Words that have also been added from other lists will not be deleted.
-            li Progress on these words is not removed.
-              | If you add them again later, Skritter will remember where you left off.
-        .modal-body.step-2.hidden
-          p.text-center
-            i.fa.fa-3x.fa-spinner.fa-pulse
-            .text-center
-              strong Deleting list...
-              #deleting-status.alert.alert-warning.hidden
+            ul.text-muted
+              li We recommend you don't delete words. That way you won't forget old vocabulary!
+              li Words that have also been added from other lists will not be deleted.
+              li Progress on these words is not removed.
+                | If you add them again later, Skritter will remember where you left off.
+          .step-2.hidden
+            p.text-center
+              i.fa.fa-3x.fa-spinner.fa-pulse
+              .text-center
+                strong Deleting list...
+                #deleting-status.alert.alert-warning.hidden
         .modal-footer
           button#cancel-btn.btn.btn-default(type="button") Cancel
           button#confirm-btn.btn.btn-danger(type="button") Confirm - Remove this list
