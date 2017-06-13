@@ -44,7 +44,8 @@ const ItemCollection = BaseSkritterCollection.extend({
   },
 
   /**
-   * Adds a single item for a user to study
+   * Adds a single item for a user to study.
+   * DON'T CALL THIS FUNCTION DIRECTLY: use addItems() instead!
    * @param {Object} [options] options for the add operation
    * @param {String} [options.listId] a list id from which to add items
    * @return {Promise<Object>} resolves when the item has been added
@@ -53,15 +54,18 @@ const ItemCollection = BaseSkritterCollection.extend({
   addItem: function(options) {
     const self = this;
 
+    options = options || {};
+    options.limit = options.limit || 1;
+    options.listId = options.listId || '';
+
     return new Promise((resolve, reject) => {
       if (this.addingState === 'standby') {
         this.addingState = 'adding';
       } else {
         resolve();
+
         return;
       }
-
-      options.listId = options.listId || '';
 
       $.ajax({
         url: app.getApiUrl() + 'items/add?lists=' + options.listId + '&lang=' + app.getLanguage(),
@@ -77,13 +81,18 @@ const ItemCollection = BaseSkritterCollection.extend({
           if (result.Items.length) {
             const item = new ItemModel(result.Items[0]);
 
+            console.log('ADDED ITEM:', result.Items[0]);
+
             item._loaded = false;
             item._queue = true;
 
             self.add(item);
-
             self.unshift(item);
-            self.preloadNext();
+
+            // only preload when a single item is being added
+            if (options.limit === 1) {
+              self.preloadNext();
+            }
           }
 
           self.addingState = 'standby';
@@ -105,37 +114,41 @@ const ItemCollection = BaseSkritterCollection.extend({
    * @method addItems
    */
   addItems: function(options, callback) {
-    let self = this;
     let count = 0;
     let results = {items: [], numVocabsAdded: 0, itemsFailed: 0};
 
     options = options || {};
     options.limit = options.limit || 1;
 
-    app.user.isSubscriptionActive((active) => {
+    app.user.isSubscriptionActive(active => {
       if (!active) {
         this.itemsAdded(results, callback);
+
+        return;
       }
 
-      async.whilst(() => { return count < options.limit}, function(whilstCb) {
-        count++;
+      async.whilst(
+        () => {
+          return count < options.limit
+        },
+        async callback => {
+          count++;
+          try {
+            const result = await this.addItem(options);
 
-        self.addItem(options).then((result) => {
-          if (result) {
             results.items.push(result);
             results.numVocabsAdded += result.numVocabsAdded;
+
+            callback();
+          } catch (error) {
+            results.itemsFailed++;
+
+            callback();
           }
-
-          whilstCb();
-        }, (error) => {
-          results.itemsFailed++;
-
-          // TODO: retry?
-          whilstCb();
+        },
+        () => {
+          this.itemsAdded(results, callback);
         });
-      }, () => {
-        this.itemsAdded(results, callback);
-      });
     });
   },
 
@@ -150,6 +163,7 @@ const ItemCollection = BaseSkritterCollection.extend({
    * @return {Object} the results object
    */
   itemsAdded: function(results, callback) {
+    this.preloadNext();
     this.updateDueCount();
 
     if (_.isFunction(callback)) {
@@ -315,6 +329,11 @@ const ItemCollection = BaseSkritterCollection.extend({
 
           // check if model has been removed from collection
           if (!model) {
+            return false;
+          }
+
+          // exclude models that have not been fully loaded yet
+          if (!model._loaded) {
             return false;
           }
 
