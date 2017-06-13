@@ -304,7 +304,7 @@ const DemoPage = GelatoPage.extend({
       buttonText: 'Next',
       showConfirmButton: true,
       style: {
-        backgdrop: {
+        backdrop: {
           top: '51px'
         },
         dialog: {

@@ -36,6 +36,12 @@ module.exports = GelatoDialog.extend({
       showConfirmButton: this.showConfirmButton
     });
 
+    if (this.style) {
+      _.defer(() => {
+        this.setStyle(this.style);
+      });
+    }
+
     return this;
   },
 
