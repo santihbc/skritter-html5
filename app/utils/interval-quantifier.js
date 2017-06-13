@@ -105,6 +105,25 @@ IntervalQuantifier.prototype.quantify = function(item, score) {
 };
 
 /**
+ * @method calculateReadiness
+ * @param {Object} item
+ * @param {Number} [now]
+ * @returns {Number}
+ */
+IntervalQuantifier.prototype.calculateReadiness = function(item, now) {
+  if (!item.last) {
+    return 9999;
+  }
+
+  now = now || moment().unix();
+
+  const actualAgo = now - item.last;
+  const scheduledAgo = item.next - item.last;
+
+  return actualAgo / scheduledAgo;
+};
+
+/**
  * @method randomizeInterval
  * @param {Number} value
  */

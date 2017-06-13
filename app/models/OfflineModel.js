@@ -21,6 +21,10 @@ const OfflineModel = GelatoModel.extend({
     this.user = options.user;
   },
 
+  items: [],
+
+  reviews: [],
+
   /**
    * @property defaults
    * @type {Object}
@@ -36,6 +40,74 @@ const OfflineModel = GelatoModel.extend({
    */
   cache: function () {
     app.setLocalStorage(this.user.id + '-offline', this.toJSON());
+  },
+
+  /**
+   * Returns an array of items actively being studied.
+   * @returns {Array}
+   */
+  getActiveItems: function () {
+    const parts = app.user.getFilteredParts();
+    const styles = app.user.getFilteredStyles();
+
+    return _.filter(this.items, item => {
+      // exclude items without vocabIds
+      if (!item.vocabIds.length) {
+        return false;
+      }
+
+      // exclude part not including in user settings
+      if (!_.includes(parts, item.part)) {
+        return false;
+      }
+
+      // exclude style not including in user settings
+      if (!_.includes(styles, item.style)) {
+        return false;
+      }
+
+      return true;
+    });
+  },
+
+  /**
+   * Returns an array of item to be studied next.
+   * @returns {Array}
+   */
+  getNextItems: function () {
+    const now = moment().unix();
+    const reviews = this.getSortedReviews();
+
+    return _.chain(this.getActiveItems())
+      .sortBy(item => {
+        const related = _.filter(reviews, {itemId: item._id});
+        const clonedItem = _.cloneDeep(item);
+
+        if (related.length) {
+          _.forEach(related, review => {
+            const interval = app.fn.interval.quantify(clonedItem, review.score);
+
+            clonedItem.interval = interval;
+            clonedItem.last = review.timestamp;
+            clonedItem.next += interval;
+            clonedItem.reviews++;
+            clonedItem.successes++;
+          });
+        }
+
+        item.readiness = app.fn.interval.calculateReadiness(clonedItem || item, now);
+
+        return -item.readiness;
+      })
+      .value();
+  },
+
+  /**
+   * Returns an array of reviews sorted by creation date.
+   * @returns {Array}
+   */
+  getSortedReviews: function () {
+    return this.reviews;
   },
 
   /**
@@ -57,6 +129,31 @@ const OfflineModel = GelatoModel.extend({
       reviews: 'id',
       vocabs: 'id,writing'
     });
+
+    return Promise.all([
+      this.loadItems(),
+      this.loadReviews()
+    ]);
+  },
+
+  /**
+   * Loads all items from indexedDB.
+   * @returns {Promise.<Array>}
+   */
+  loadItems: async function () {
+    this.items = await this.database.items.toArray();
+
+    return this.items;
+  },
+
+  /**
+   * Loads all reviews from indexedDB.
+   * @returns {Promise.<Array>}
+   */
+  loadReviews: async function () {
+    this.reviews = await this.database.reviews.toArray();
+
+    return this.reviews;
   },
 
   /**
