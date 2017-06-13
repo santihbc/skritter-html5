@@ -74,8 +74,10 @@ function pinyinToTone(text, includeSpaces) {
  */
 function pinyinToZhuyin(text, excludeTones) {
   text = text.toLowerCase();
+
   var zhuyinArray = [];
   var textArray = text.match(/[a-z|A-Z]+[0-9]+|,\s|'|\s\.\.\.\s/g);
+
   if (textArray) {
     for (var i = 0, length = textArray.length; i < length; i++) {
       var textItem = textArray[i];
@@ -102,6 +104,8 @@ function pinyinToZhuyin(text, excludeTones) {
  * @return {String}
  */
 function removeToneMarks(text) {
+  text = text.toLowerCase();
+
   for (var syllable in syllables) {
     var letter = syllables[syllable];
     text = text.replace(syllable, letter);
@@ -116,6 +120,8 @@ function removeToneMarks(text) {
  * @return {Boolean} whether tone-marked vowels are contained.
  */
 function hasToneMarks(text) {
+  text = text.toLowerCase();
+
   for (var syllable in syllables) {
     var letter = syllables[syllable];
     if (text.replace(syllable, letter) !== text) {
@@ -132,6 +138,7 @@ function hasToneMarks(text) {
  * @return {String}
  */
 function removeToneNumbers(text) {
+  text = text.toLowerCase();
   text = text.replace(/[0-9]/g, '');
   text = text.replace(/v/g, 'ü');
 
