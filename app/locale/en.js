@@ -122,7 +122,7 @@ module.exports = {
       "errorNoCharacterTypeSelected": "You must select either simplified, traditional, or both character types to study.",
       "languageLabel": "What language do you want to learn?",
       "setupExplanation": "All these settings and more can be changed later, these are just to get you started.",
-      "setupYourAccount": "Let's setup your account!",
+      "setupYourAccount": "Let's set up your account!",
       "simpChars": "Simplified Characters",
       "simpCharsDescription": "Used in the People's Republic of China (PRC) and Singapore",
       "timezoneLabel": "Timezone",
