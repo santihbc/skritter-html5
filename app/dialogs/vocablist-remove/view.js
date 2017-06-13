@@ -28,13 +28,16 @@ module.exports = BootstrapDialog.extend({
     this.vocablist = options.vocablist;
     this.vocablistId = this.vocablist.id;
 
+    // a promise that resolves when the number of items needed to be deleted from the list is fetched
+    this.fetchingCount = null;
+
     this.itemsCursor = '';
     this.itemsRemoved = 0;
     this.itemsToRemove = 0;
     this.toRemove = ["item", "sect_complete"];
 
     if (!this.vocablist) {
-      throw new Error('VocablistRemoveDialog requires a vocablist passed in!')
+      throw new Error('VocablistRemoveDialog requires a vocablist passed in');
     }
   },
 
@@ -52,8 +55,11 @@ module.exports = BootstrapDialog.extend({
    * Gets a count of all the vocab in the list, then deletes them
    */
   deleteVocabFromList: function() {
+    if (!this.fetchingCount) {
+      this.fetchingCount = this.getListVocabCount();
+    }
 
-    this.getListVocabCount().then(() => {
+    this.fetchingCount.then(() => {
 
       // TODO: update UI with count
       this._removeVocab().then(() => {
@@ -74,7 +80,7 @@ module.exports = BootstrapDialog.extend({
     return new Promise((resolve, reject) => {
       $.ajax({
         context: this,
-        url: app.getApiUrl() + 'vocablists/' + this.vocablistId + '/vocab-count?cursor=' + this.itemsCursor,
+        url: app.getApiUrl() + 'vocablists/' + this.vocablistId + '/vocab-count?gzip=false&cursor=' + this.itemsCursor,
         type: 'GET',
         headers: app.user.session.getHeaders(),
         error: function(error) {
@@ -111,6 +117,8 @@ module.exports = BootstrapDialog.extend({
    * @param {Event} e
    */
   handleClickConfirmButton: function(e) {
+    this.fetchingCount = this.getListVocabCount();
+
     this.vocablist.save({'studyingMode': 'not studying'}, {
       patch: true,
       method: 'PUT',
@@ -177,11 +185,11 @@ module.exports = BootstrapDialog.extend({
     let toGo = this.itemsToRemove - this.itemsRemoved;
     let statusText = percentDone + "% complete ";
     if (toGo > 0) {
-      statusText += "(" + to_go + " to process)";
+      statusText += "(" + toGo + " items still to process)";
     }
 
     if (this.toRemove[0] !== 'item') {
-      statusText = 'WrappingUp';
+      statusText = 'Finishing up...';
     }
     this.showVocabDeletionStatusText(statusText);
   },
@@ -196,7 +204,7 @@ module.exports = BootstrapDialog.extend({
       $.ajax({
         context: this,
         url: app.getApiUrl() + 'vocablists/' + this.vocablistId + '/vocab',
-        type: 'DELETE',
+        type: 'POST',
         headers: app.user.session.getHeaders(),
         data: {
           kind: this.toRemove[0],

@@ -1,4 +1,7 @@
 @import "../../styles/_variables";
 
 bootstrap-dialog[data-name="vocablist-remove"] {
+  .alert-warning {
+    margin-top: 20px;
+  }
 }
