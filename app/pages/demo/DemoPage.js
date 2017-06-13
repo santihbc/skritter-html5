@@ -44,7 +44,9 @@ const DemoPage = GelatoPage.extend({
    * @constructor
    */
   initialize: function(options) {
-    _.bindAll(this, 'teachDemoChar1','teachDemoChar2', 'writeDemoChar1', 'writeDemoChar2', 'completeDemo', 'switchToWriting');
+    _.bindAll(this, 'teachDemoChar1','teachDemoChar2', 'writeDemoChar1',
+      'writeDemoChar2', 'completeDemo', 'switchToWriting', 'teachEraseDemoChar1',
+      'teachDefinitionPrompt1', 'teachEraseDemoChar2');
 
     this.dialog = null;
     this.lang = 'zh';
@@ -136,11 +138,73 @@ const DemoPage = GelatoPage.extend({
       function(error, vocab) {
         ScreenLoader.hide();
         self.prompt.show();
-        self.promptItems = vocab.getPromptItems('rune');
+        if (app.isDevelopment()) {
+          const runeItems = vocab.getPromptItems('rune');
+          self.promptItems = runeItems;
+        } else {
+          self.promptItems = vocab.getPromptItems('rune');
+        }
         self.promptItems.teachAll();
         self.teachDemoChar1();
       }
     );
+  },
+
+  /**
+   * Step that teaches users how to use the erase characters from the prompt
+   */
+  teachEraseDemoChar1: function() {
+    vent.trigger('notification:show', {
+        dialogTitle: 'Erasing Characters',
+        showTitle: true,
+        keepAlive: true,
+        body: this.parseTemplate(require('./notify-erase-character1.jade'))
+      });
+
+    const eraseBtn = $('.icon-study-erase');
+    const eraseBtnPos = eraseBtn.offset();
+    const eraseBtnWidth = Math.round(eraseBtn.width() / 2);
+    const eraseBtnHeight = Math.round(eraseBtn.width() / 2);
+    vent.trigger('callToActionGuide:toggle', true, {
+      top: (eraseBtnPos.top - eraseBtnHeight) + 'px',
+      left: (eraseBtnPos.left - eraseBtnWidth) + 'px',
+      width: (eraseBtnHeight * 4) + 'px',
+      height: (eraseBtnHeight * 4) + 'px'
+    });
+
+    this.prompt.once('character:erased', this.teachEraseDemoChar2);
+  },
+
+  /**
+   * Step that responds to a user erasing a character
+   */
+  teachEraseDemoChar2: function() {
+    vent.trigger('notification:show', {
+      dialogTitle: 'Erasing Characters',
+      showTitle: true,
+      keepAlive: true,
+      body: this.parseTemplate(require('./notify-erase-character2.jade'))
+    });
+
+    vent.trigger('callToActionGuide:toggle', false);
+
+    this.prompt.once('character:complete', this.teachDefinitionPrompt1);
+  },
+
+  /**
+   * Step that teaches users how to answer a definition prompt
+   */
+  teachDefinitionPrompt1: function() {
+    const defnItems = this.vocab.getPromptItems('defn');
+    this.promptItems = defnItems;
+    this.prompt.set(this.promptItems);
+
+    vent.trigger('notification:show', {
+      dialogTitle: 'Definition Prompts',
+      showTitle: true,
+      keepAlive: true,
+      body: this.parseTemplate(require('./notify-definition1.jade'))
+    });
   },
 
   /**
@@ -211,7 +275,12 @@ const DemoPage = GelatoPage.extend({
     this.prompt.part.eraseCharacter();
     this.prompt.review.set('score', 3);
     this.prompt.$('#toolbar-action-container').show();
-    this.prompt.once('character:complete', this.completeDemo);
+
+    if (app.isDevelopment()) {
+      this.prompt.once('character:complete', this.teachEraseDemoChar1);
+    } else {
+      this.prompt.once('character:complete', this.completeDemo);
+    }
   },
 
   /**
