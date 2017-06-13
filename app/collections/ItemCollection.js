@@ -319,8 +319,8 @@ const ItemCollection = BaseSkritterCollection.extend({
    */
   getNext: function() {
     const now = moment().unix();
-    const parts = app.user.getFilteredParts().join(',');
-    const styles = app.user.getFilteredStyles().join(',');
+    const parts = app.user.getFilteredParts();
+    const styles = app.user.getFilteredStyles();
 
     return _
       .chain(this.getQueue())
