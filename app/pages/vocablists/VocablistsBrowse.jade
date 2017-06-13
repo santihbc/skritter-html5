@@ -15,7 +15,11 @@ gelato-page(data-name='vocablists-browse')
                 .input-group.input-group-lg
                   span.input-group-addon
                     i.fa.fa-search
-                  input#list-search-input.form-control(type="text", placeholder="Type to search by title")
+                  input#list-search-input.form-control(
+                  type="text",
+                  value=app.get('lastVocablistBrowseSearch'),
+                  placeholder="Type to search by title"
+                  )
               .col-md-1
                 span#list-option.glyphicon.glyphicon-th-list.layout-selector.chosen
               .col-md-1

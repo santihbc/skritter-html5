@@ -53,7 +53,17 @@ module.exports = {
    */
   language: '{!application-language!}',
 
+  /**
+   * A number value representing last time items have been changed.
+   * @type {Number}
+   */
   lastItemChanged: 0,
+
+  /**
+   * A string representing last vocablist browse search term.
+   * @type {String}
+   */
+  lastVocablistBrowseSearch: '',
 
   /**
    * The UI language code

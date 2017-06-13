@@ -30,7 +30,7 @@ const VocablistsBrowseTableComponent = GelatoComponent.extend({
    */
   initialize: function() {
     this._lists = [];
-    this._filterString = '';
+    this._filterString = app.get('lastVocablistBrowseSearch');
     this._filterType = [];
     this._layout = 'list';
     this._sortType = 'popularity';
@@ -151,7 +151,11 @@ const VocablistsBrowseTableComponent = GelatoComponent.extend({
    * @param {String} value
    */
   setFilterString: function(value) {
-    this._filterString = value.toLowerCase();
+    const searchValue = value.toLowerCase();
+
+    app.set('lastVocablistBrowseSearch', searchValue);
+
+    this._filterString = searchValue;
     this.render();
   },
 
