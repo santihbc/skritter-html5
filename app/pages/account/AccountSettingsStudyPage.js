@@ -114,7 +114,7 @@ const AccountSettingsStudyPage = GelatoPage.extend({
 
     app.user.set({
       autoAddComponentCharacters: this.$('#field-add-contained').is(':checked'),
-      autoAdvancePrompts: this.$('#field-auto-advance').is(':checked'),
+      autoAdvancePrompts: this.$('#field-auto-advance').is(':checked') ? 1.0 : 0,
       hideDefinition: this.$('#field-hide-definition').is(':checked'),
       hideReading: this.$('#field-hide-reading').is(':checked'),
       showHeisig: this.$('#field-heisig').is(':checked'),
@@ -146,7 +146,7 @@ const AccountSettingsStudyPage = GelatoPage.extend({
 
     zhStudyStyleChanged = (app.isChinese() && app.user.hasChanged('addSimplified') ||
     app.user.hasChanged('addTraditional'));
-
+    app.user.cache();
     app.user.save(null, {
       error: function(req, error) {
         let msg = error.responseJSON.message;
