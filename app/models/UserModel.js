@@ -43,7 +43,7 @@ const UserModel = SkritterModel.extend({
     studyKana: false,
     teachingMode: true,
     timezone: 'America/New_York',
-    volume: 1,
+    volume: 1.0,
     wordDictionary: null
   },
 
