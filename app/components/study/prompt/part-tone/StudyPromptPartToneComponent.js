@@ -89,6 +89,8 @@ const StudyPromptPartToneComponent = GelatoComponent.extend({
       this.renderIncomplete();
     }
 
+    this.renderTemplate();
+
     return this;
   },
 
