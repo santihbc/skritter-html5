@@ -400,6 +400,8 @@ const StudyPromptComponent = GelatoComponent.extend({
    * @param {Object} [info] info for displaying dialog
    */
   showVocabInfo: function(id, info) {
+    console.log(id, info, this.vocabInfo);
+
     if (app.isMobile()) {
       vent.trigger('vocabInfo:toggle', id || this.reviews.vocab.id, info || this.vocabInfo);
     } else {
@@ -601,6 +603,7 @@ const StudyPromptComponent = GelatoComponent.extend({
           console.error('WORD DIALOG LOAD ERROR:', error);
         } else {
           const vocabInfo = {
+            id: wordVocabs.at(0).id,
             items: wordItems,
             vocabs: wordVocabs,
             vocabsContaining: wordVocabsContaining
@@ -608,7 +611,10 @@ const StudyPromptComponent = GelatoComponent.extend({
 
           vocabInfo.vocabsContaining.remove(vocabId);
 
-          self.vocabInfo = vocabInfo;
+          // prevent late loading words from preloading
+          if (self.reviews.vocab.id === vocabInfo.id) {
+            self.vocabInfo = vocabInfo;
+          }
         }
       }
     );
